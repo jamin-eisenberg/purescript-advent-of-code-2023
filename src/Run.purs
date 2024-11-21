@@ -3,8 +3,9 @@ module Main where
 import Prelude
 
 import Control.Alt ((<|>))
-
 import Data.Either (Either(..))
+import Data.Foldable (fold)
+import Data.Maybe (Maybe(..))
 import Data.String as String
 import Effect (Effect)
 import Effect.Console (log)
@@ -32,12 +33,16 @@ sample = ado
 
   in Args { input }
 
-run :: forall a b c. Show b => Show c => Int -> (Parsing.Parser String a) -> (a -> Either b c) -> Effect Unit
-run day parser calculator = do
+run :: forall a b c. Show b => Show c => Int -> Maybe (String -> String) -> (Parsing.Parser String a) -> (a -> Either b c) -> Effect Unit
+run day preprocessor parser calculator = do
   Args { input } <- Options.execParser (Options.info sample Options.fullDesc)
   contents <- readTextFile UTF8 ("src" <> "/Day" <> show day <> "/" <> inputFilename input)
+  let
+    preprocessed = case preprocessor of
+      Nothing -> contents
+      Just f -> f contents
   log
-    case Parsing.runParser contents parser of
+    case Parsing.runParser preprocessed parser of
       Left parseError ->
         Parsing.parseErrorHuman contents 100 parseError
           # String.joinWith "\n"
