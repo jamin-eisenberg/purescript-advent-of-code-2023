@@ -33,7 +33,7 @@ sample = ado
 
   in Args { input }
 
-run :: forall a b c. Show b => Show c => Int -> Maybe (String -> String) -> (Parsing.Parser String a) -> (a -> Either b c) -> Effect Unit
+run :: forall a b. Show b => Int -> Maybe (String -> String) -> (Parsing.Parser String a) -> (a -> Either String b) -> Effect Unit
 run day preprocessor parser calculator = do
   Args { input } <- Options.execParser (Options.info sample Options.fullDesc)
   contents <- readTextFile UTF8 ("src" <> "/Day" <> show day <> "/" <> inputFilename input)
